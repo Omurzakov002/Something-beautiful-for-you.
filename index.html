@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Для Тебя 🌸</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            /* Темный фон с глубоким розовым оттенком */
+            background-color: #120309;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Карточка загрузки */
+        .card {
+            background: rgba(255, 182, 193, 0.08);
+            border: 1px solid rgba(255, 182, 193, 0.2);
+            padding: 30px;
+            border-radius: 25px;
+            text-align: center;
+            backdrop-filter: blur(15px);
+            width: 300px;
+            z-index: 10;
+            transition: opacity 1s ease, transform 1s ease;
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.15);
+        }
+
+        .card.hidden {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+            pointer-events: none;
+        }
+
+        .icon {
+            font-size: 45px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #ffd1dc;
+        }
+
+        .status {
+            font-size: 14px;
+            color: #fcaebf;
+            margin-bottom: 30px;
+            min-height: 1.4em;
+        }
+
+        /* Розовая кнопка */
+        .btn {
+            background: rgba(255, 192, 203, 0.15);
+            border: 1px solid rgba(255, 192, 203, 0.3);
+            color: #aaa;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            cursor: not-allowed;
+            transition: all 0.4s ease;
+        }
+
+        .btn.active {
+            background: #ff69b4;
+            color: #fff;
+            border-color: #ff69b4;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(255, 105, 180, 0.6);
+        }
+
+        .btn.active:hover {
+            background: #ff85c0;
+            transform: translateY(-2px);
+        }
+
+        /* Анимационный холст */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Финальное сообщение */
+        .message {
+            position: absolute;
+            bottom: 90px;
+            font-size: 22px;
+            color: #ffe4e1;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 2s ease 1s, transform 2s ease 1s;
+            z-index: 10;
+            letter-spacing: 0.5px;
+            text-align: center;
+            font-weight: 300;
+            text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+        }
+
+        .message.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Карточка выбора -->
+    <div class="card" id="card">
+        <span class="icon">🌸</span>
+        <h1 class="title">Для Тебя</h1>
+        <p class="status" id="status">Создаю кое-что особенное...</p>
+        <button class="btn" id="btn" disabled>Взглянуть</button>
+    </div>
+
+    <!-- Canvas для розы -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Финальный текст -->
+    <div class="message" id="message">Пусть этот цветок украсит твой день ✨</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const card = document.getElementById('card');
+            const status = document.getElementById('status');
+            const btn = document.getElementById('btn');
+            const canvas = document.getElementById('canvas');
+            const message = document.getElementById('message');
+            const ctx = canvas.getContext('2d');
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            // Этапы загрузки
+            const steps = [
+                { text: "Собираю солнечные лучи...", delay: 1200 },
+                { text: "Окрашиваю в нежно-розовый...", delay: 2600 },
+                { text: "Готово ✨", delay: 4000 }
+            ];
+
+            steps.forEach(({ text, delay }) => {
+                setTimeout(() => {
+                    status.textContent = text;
+                    if (text === "Готово ✨") {
+                        btn.classList.add('active');
+                        btn.disabled = false;
+                    }
+                }, delay);
+            });
+
+            btn.addEventListener('click', () => {
+                card.classList.add('hidden');
+                setTimeout(startFlowerAnimation, 600);
+            });
+
+            function startFlowerAnimation() {
+                const cx = canvas.width / 2;
+                const cy = canvas.height / 2 + 120;
+                let progress = 0;
+
+                function animate() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    progress += 0.005;
+
+                    const stemProgress = Math.min(progress * 2, 1);
+                    const stemHeight = 280 * stemProgress;
+
+                    // Зеленый стебель
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy);
+                    ctx.quadraticCurveTo(cx - 15, cy - stemHeight / 2, cx, cy - stemHeight);
+                    ctx.strokeStyle = '#4a7c59';
+                    ctx.lineWidth = 4;
+                    ctx.lineCap = 'round';
+                    ctx.stroke();
+
+                    const flowerY = cy - stemHeight;
+
+                    // Листики
+                    if (progress > 0.3) {
+                        const leafProgress = Math.min((progress - 0.3) * 2.5, 1);
+
+                        ctx.save();
+                        ctx.translate(cx - 3, cy - 110);
+                        ctx.scale(leafProgress, leafProgress);
+                        ctx.beginPath();
+                        ctx.moveTo(0, 0);
+                        ctx.quadraticCurveTo(-45, -10, -55, -35);
+                        ctx.quadraticCurveTo(-25, 10, 0, 0);
+                        ctx.fillStyle = '#569368';
+                        ctx.fill();
+                        ctx.restore();
+
+                        ctx.save();
+                        ctx.translate(cx + 3, cy - 155);
+                        ctx.scale(leafProgress, leafProgress);
+                        ctx.beginPath();
+                        ctx.moveTo(0, 0);
+                        ctx.quadraticCurveTo(45, -10, 55, -35);
+                        ctx.quadraticCurveTo(25, 10, 0, 0);
+                        ctx.fillStyle = '#569368';
+                        ctx.fill();
+                        ctx.restore();
+                    }
+
+                    // Розовые лепестки
+                    if (progress > 0.5) {
+                        const bloomProgress = Math.min((progress - 0.5) * 2, 1);
+                        const petalCount = 14;
+
+                        for (let i = 0; i < petalCount; i++) {
+                            const angle = (i * Math.PI * 2) / petalCount;
+                            const radius = 40 * bloomProgress;
+
+                            ctx.save();
+                            ctx.translate(cx, flowerY);
+                            ctx.rotate(angle + (1 - bloomProgress) * 0.3);
+
+                            ctx.beginPath();
+                            ctx.moveTo(0, 0);
+                            ctx.quadraticCurveTo(radius, -radius * 1.6, 0, -radius * 2.2);
+                            ctx.quadraticCurveTo(-radius, -radius * 1.6, 0, 0);
+
+                            // Чередование мягких розовых тонов
+                            ctx.fillStyle = i % 2 === 0 ? 'rgba(255, 182, 193, 0.9)' : 'rgba(255, 105, 180, 0.85)';
+                            ctx.fill();
+                            ctx.restore();
+                        }
+
+                        // Ядро бутона
+                        ctx.beginPath();
+                        ctx.arc(cx, flowerY, 15 * bloomProgress, 0, Math.PI * 2);
+                        ctx.fillStyle = '#ffb6c1';
+                        ctx.fill();
+
+                        ctx.beginPath();
+                        ctx.arc(cx, flowerY, 8 * bloomProgress, 0, Math.PI * 2);
+                        ctx.fillStyle = '#ff69b4';
+                        ctx.fill();
+                    }
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        message.classList.add('visible');
+                    }
+                }
+
+                animate();
+            }
+        });
+    </script>
+</body>
+</html>
